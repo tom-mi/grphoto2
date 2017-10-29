@@ -43,11 +43,13 @@ class Grphoto2 implements Closeable {
     List<DetectedCamera> camera_autodetect() {
         def rawList = new PointerByReference()
         checkErrorCode(lib.gp_list_new(rawList))
+        rawList.pointer = rawList.value
         try {
-            checkErrorCode(lib.gp_camera_autodetect(rawList.value, context.value))
+            checkErrorCode(lib.gp_camera_autodetect(rawList, context))
             def listWrapper = new ListWrapper(lib, rawList)
             listWrapper.collect { new DetectedCamera(model: it.name, path: it.value) }
         } finally {
+            rawList.pointer = null
             lib.gp_list_free(rawList)
         }
     }

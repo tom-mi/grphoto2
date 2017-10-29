@@ -21,16 +21,14 @@ class ListWrapper extends AbstractList<ListItem> {
         PointerByReference name = new PointerByReference()
         PointerByReference value = new PointerByReference()
 
-        // TODO Replace with non-deprecated calls. However, that currently returns -2 (BAD ARGUMENT).
-        checkErrorCode(lib.gp_list_get_name(list.value, i, name))
-        checkErrorCode(lib.gp_list_get_value(list.value, i, value))
+        checkErrorCode(lib.gp_list_get_name(list, i, name))
+        checkErrorCode(lib.gp_list_get_value(list, i, value))
         new ListItem(name: name.value.getString(0), value: value.value.getString(0))
     }
 
     @Override
     int size() {
-        // TODO Replace with non-deprecated calls. However, that currently returns -2 (BAD ARGUMENT).
-        checkErrorCode(lib.gp_list_count(list.value))
+        checkErrorCode(lib.gp_list_count(list))
     }
 }
 
