@@ -7,7 +7,11 @@ import jdk.nashorn.internal.ir.annotations.Immutable
 @Immutable
 @Canonical
 @ToString(includePackage = false)
-class DetectedCamera {
-    String model
+class ConfigField {
+
     String path
+    String name
+    String label
+    ConfigFieldType type
+    List<String> choices
 }

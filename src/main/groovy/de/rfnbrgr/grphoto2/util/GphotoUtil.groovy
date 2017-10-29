@@ -1,6 +1,5 @@
 package de.rfnbrgr.grphoto2.util
 
-import com.sun.jna.ptr.PointerByReference
 import de.rfnbrgr.grphoto2.domain.GphotoError
 import de.rfnbrgr.grphoto2.jna.Gphoto2Library
 

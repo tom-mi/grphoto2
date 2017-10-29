@@ -73,7 +73,7 @@ class Grphoto2 implements Closeable {
         try {
             checkErrorCode(lib.gp_camera_set_port_info(camera, portInfo.info))
             checkErrorCode(lib.gp_camera_init(camera, context))
-            return new CameraConnection(lib, camera)
+            return new CameraConnection(lib, context, camera)
         } catch (Exception e) {
             lib.gp_camera_unref(camera)
             throw e
