@@ -3,12 +3,13 @@ package de.rfnbrgr.grphoto2
 import com.sun.jna.Pointer
 import com.sun.jna.ptr.PointerByReference
 import de.rfnbrgr.grphoto2.domain.CameraNotFoundError
-import de.rfnbrgr.grphoto2.domain.Connection
+import de.rfnbrgr.grphoto2.domain.CameraConnection
 import de.rfnbrgr.grphoto2.domain.DetectedCamera
 import de.rfnbrgr.grphoto2.jna.Camera
 import de.rfnbrgr.grphoto2.jna.Gphoto2Library
 import de.rfnbrgr.grphoto2.util.ListWrapper
 import de.rfnbrgr.grphoto2.util.PortInfoListWrapper
+import de.rfnbrgr.grphoto2.util.PortInfoWrapper
 import groovy.util.logging.Slf4j
 
 import static de.rfnbrgr.grphoto2.util.GphotoUtil.checkErrorCode
@@ -52,24 +53,31 @@ class Grphoto2 {
         }
     }
 
-    def connect(String path) {
-        withPortList { PortInfoListWrapper portList ->
+    CameraConnection connect(DetectedCamera camera) {
+        connect(camera.path)
+    }
+
+    CameraConnection connect(String path) {
+        (CameraConnection) withPortList { PortInfoListWrapper portList ->
             def portInfo = portList.find { it.path == path }
             if (!portInfo) {
-                throw new CameraNotFoundError("No camera found at path $path")
+                throw new CameraNotFoundError("No camera found at path [$path]")
             }
+            connectWithPortInfo(portInfo)
+        }
+    }
 
-            Camera.ByReference[] cameraReferenceArray = [new Camera.ByReference()]
-            checkErrorCode(lib.gp_camera_new(cameraReferenceArray))
-            def camera = cameraReferenceArray[0]
-            try {
-                checkErrorCode(lib.gp_camera_set_port_info(camera, portInfo.info))
-                checkErrorCode(lib.gp_camera_init(camera, context))
-                return new Connection(lib, camera)
-            } catch (Exception e) {
-                lib.gp_camera_unref(camera)
-                throw e
-            }
+    private CameraConnection connectWithPortInfo(PortInfoWrapper portInfo) {
+        Camera.ByReference[] cameraReferenceArray = [new Camera.ByReference()]
+        checkErrorCode(lib.gp_camera_new(cameraReferenceArray))
+        def camera = cameraReferenceArray[0]
+        try {
+            checkErrorCode(lib.gp_camera_set_port_info(camera, portInfo.info))
+            checkErrorCode(lib.gp_camera_init(camera, context))
+            return new CameraConnection(lib, camera)
+        } catch (Exception e) {
+            lib.gp_camera_unref(camera)
+            throw e
         }
     }
 
