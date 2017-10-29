@@ -7,9 +7,9 @@ import groovy.transform.ToString
 @ToString(includePackage = false )
 class ConfigEntry {
     final ConfigField field
-    String value
+    def value
 
-    ConfigEntry(ConfigField field, String value) {
+    ConfigEntry(ConfigField field, value) {
         this.field = field
         this.value = value
     }

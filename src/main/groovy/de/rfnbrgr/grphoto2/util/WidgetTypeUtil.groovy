@@ -2,7 +2,7 @@ package de.rfnbrgr.grphoto2.util
 
 import de.rfnbrgr.grphoto2.domain.ConfigFieldType
 
-import static ConfigFieldType.*
+import static de.rfnbrgr.grphoto2.domain.ConfigFieldType.*
 import static de.rfnbrgr.grphoto2.jna.Gphoto2Library.CameraWidgetType.*
 
 class WidgetTypeUtil {

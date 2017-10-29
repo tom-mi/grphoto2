@@ -5,6 +5,7 @@ import com.sun.jna.ptr.PointerByReference
 import de.rfnbrgr.grphoto2.jna.Gphoto2Library
 import groovy.transform.Memoized
 
+import static de.rfnbrgr.grphoto2.jna.Gphoto2Library.CameraWidgetType.*
 import static de.rfnbrgr.grphoto2.util.GphotoUtil.checkErrorCode
 
 class WidgetWrapper {
@@ -47,6 +48,26 @@ class WidgetWrapper {
         def valuePointer = new PointerByReference()
         checkErrorCode(lib.gp_widget_get_label(widget, valuePointer))
         valuePointer.value.getString(0)
+    }
+
+    @Memoized
+    def getValue() {
+        def valuePointer = new PointerByReference()
+        checkErrorCode(lib.gp_widget_get_value(widget, valuePointer.pointer))
+        readValueWithCorrectType(valuePointer)
+    }
+
+    private readValueWithCorrectType(PointerByReference valuePointer) {
+        switch (type) {
+            case [GP_WIDGET_TEXT, GP_WIDGET_RADIO, GP_WIDGET_MENU]:
+                return valuePointer.pointer.getPointer(0).getString(0)
+            case [GP_WIDGET_DATE, GP_WIDGET_TOGGLE]:
+                return valuePointer.pointer.getInt(0)
+            case [GP_WIDGET_RANGE]:
+                // TODO check if that actually works
+                return valuePointer.pointer.getFloat(0)
+        }
+
     }
 
     @Memoized

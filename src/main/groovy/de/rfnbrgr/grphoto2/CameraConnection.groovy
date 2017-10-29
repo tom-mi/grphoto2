@@ -61,7 +61,7 @@ class CameraConnection implements Closeable {
 
     private static mapWidget(WidgetWrapper widget) {
         def field = mapField(widget)
-        new ConfigEntry(field, '')
+        new ConfigEntry(field, widget.value)
     }
 
     private static mapField(WidgetWrapper widget) {
