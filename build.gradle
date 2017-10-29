@@ -1,0 +1,33 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.anarres.gradle:gradle-jnaerator-plugin:1.0.1'
+        classpath 'com.nativelibs4java:jnaerator:0.12'
+    }
+}
+
+apply plugin: 'org.anarres.jnaerator'
+apply plugin: 'groovy'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.3.11'
+    compile 'com.nativelibs4java:jnaerator-runtime:0.12'
+    testCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
+    compile 'org.slf4j:slf4j-api:1.7.24'
+    compile 'org.slf4j:slf4j-simple:1.7.24'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+jnaerator {
+    libraryName 'gphoto2'
+    packageName 'de.rfnbrgr.grphoto2.jna'
+    headerFiles '/usr/include/gphoto2/gphoto2.h'
+}
