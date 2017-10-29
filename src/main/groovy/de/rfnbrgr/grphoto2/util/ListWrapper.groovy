@@ -4,7 +4,7 @@ import com.sun.jna.ptr.PointerByReference
 import de.rfnbrgr.grphoto2.jna.Gphoto2Library
 import groovy.transform.Canonical
 
-import static ErrorUtil.checkErrorCode
+import static GphotoUtil.checkErrorCode
 
 class ListWrapper extends AbstractList<ListItem> {
 

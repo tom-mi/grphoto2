@@ -5,5 +5,5 @@ import groovy.transform.Canonical
 @Canonical
 class DetectedCamera {
     String model
-    String port
+    String path
 }
