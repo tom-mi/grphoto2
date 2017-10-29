@@ -3,7 +3,6 @@ package de.rfnbrgr.grphoto2
 import com.sun.jna.Pointer
 import com.sun.jna.ptr.PointerByReference
 import de.rfnbrgr.grphoto2.domain.CameraNotFoundError
-import de.rfnbrgr.grphoto2.domain.CameraConnection
 import de.rfnbrgr.grphoto2.domain.DetectedCamera
 import de.rfnbrgr.grphoto2.jna.Camera
 import de.rfnbrgr.grphoto2.jna.Gphoto2Library
@@ -15,7 +14,7 @@ import groovy.util.logging.Slf4j
 import static de.rfnbrgr.grphoto2.util.GphotoUtil.checkErrorCode
 
 @Slf4j
-class Grphoto2 {
+class Grphoto2 implements Closeable {
 
     private final Gphoto2Library lib
     private final PointerByReference context
@@ -85,12 +84,20 @@ class Grphoto2 {
         def rawPortList = new PointerByReference()
         try {
             checkErrorCode(lib.gp_port_info_list_new(rawPortList))
+            // Otherwise, a segfault occurs
             rawPortList.pointer = rawPortList.value
             checkErrorCode(lib.gp_port_info_list_load(rawPortList))
             def portList = new PortInfoListWrapper(lib, rawPortList)
             closure(portList)
         } finally {
+            // This is required to avoid sporadic IllegalStateException due to the workaround above
+            rawPortList.pointer = null
             lib.gp_port_info_list_free(rawPortList)
         }
+    }
+
+    @Override
+    void close() throws IOException {
+        lib.gp_context_unref(context)
     }
 }

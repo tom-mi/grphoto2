@@ -1,7 +1,6 @@
 package de.rfnbrgr.grphoto2
 
 import de.rfnbrgr.grphoto2.domain.CameraNotFoundError
-import de.rfnbrgr.grphoto2.domain.CameraConnection
 import de.rfnbrgr.grphoto2.domain.DetectedCamera
 import spock.lang.Specification
 
@@ -14,6 +13,10 @@ class Grphoto2Spec extends Specification {
 
     def setup() {
         grphoto = new Grphoto2()
+    }
+
+    def cleanup() {
+        grphoto.close()
     }
 
     def 'camera_autodetect works'() {

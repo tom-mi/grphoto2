@@ -1,4 +1,4 @@
-package de.rfnbrgr.grphoto2.domain
+package de.rfnbrgr.grphoto2
 
 import de.rfnbrgr.grphoto2.jna.Camera
 import de.rfnbrgr.grphoto2.jna.Gphoto2Library
