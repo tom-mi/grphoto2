@@ -32,7 +32,8 @@ class CameraConnection implements Closeable {
 
     @Override
     void close() throws IOException {
-        lib.gp_camera_unref(camera)
+        lib.gp_camera_exit(camera, context)
+        // TODO gp_camara_unref required? It sometimes causes IllegalStateExceptions
     }
 
     Config readConfig() {
@@ -76,7 +77,7 @@ class CameraConnection implements Closeable {
         )
     }
 
-    void updateConfig(ConfigEntry... entries) {
+    void updateConfig(List<ConfigEntry> entries) {
         withRootWidget { WidgetWrapper rootWidget ->
             entries.each { entry ->
                 def widgetToUpdate = rootWidget.getByPath(entry.field.path)

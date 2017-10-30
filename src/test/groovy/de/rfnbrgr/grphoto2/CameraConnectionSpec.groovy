@@ -24,7 +24,8 @@ class CameraConnectionSpec extends Specification {
         connection.close()
         grphoto.close()
 
-        ['gphoto2', '--port', PATH, '--set-config-value', '/main/settings/autofocus=On'].execute()
+        ['gphoto2', '--port', PATH, '--set-config-value', '/main/settings/autofocus=On'].execute().waitFor()
+        ['gphoto2', '--port', PATH, '--set-config-value', '/main/settings/fastfs=1'].execute().waitFor()
     }
 
     def 'config can be read'() {
@@ -86,9 +87,12 @@ class CameraConnectionSpec extends Specification {
         config.getByPath('/main/settings/autofocus').value == 'On'
 
         when:
-        def update = config.getByPath('/main/settings/autofocus')
-                .entryForUpdate('Off')
-        connection.updateConfig(update)
+        def updates = [
+                config.getByPath('/main/settings/autofocus').entryForUpdate('Off'),
+                config.getByPath('/main/settings/fastfs').entryForUpdate(0),
+                config.getByPath('/main/settings/datetime').entryForUpdate(1509329425),
+        ]
+        connection.updateConfig(updates)
 
         then:
         noExceptionThrown()
@@ -98,6 +102,6 @@ class CameraConnectionSpec extends Specification {
 
         then:
         newConfig.getByPath('/main/settings/autofocus').value == 'Off'
-
+        newConfig.getByPath('/main/settings/fastfs').value == 0
     }
 }

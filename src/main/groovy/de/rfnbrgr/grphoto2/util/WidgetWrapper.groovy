@@ -1,8 +1,8 @@
 package de.rfnbrgr.grphoto2.util
 
-import com.sun.jna.Memory
 import com.sun.jna.Native
 import com.sun.jna.Pointer
+import com.sun.jna.ptr.FloatByReference
 import com.sun.jna.ptr.IntByReference
 import com.sun.jna.ptr.PointerByReference
 import de.rfnbrgr.grphoto2.jna.Gphoto2Library
@@ -85,14 +85,14 @@ class WidgetWrapper {
                 def bytes = (newValue as String).getBytes("ascii")
                 ByteBuffer buffer = ByteBuffer.allocateDirect(bytes.length + 1)
                 buffer.put(bytes)
-                return Native.getDirectBufferPointer(buffer);
+                return Native.getDirectBufferPointer(buffer)
             case [GP_WIDGET_DATE, GP_WIDGET_TOGGLE]:
-                //valuePointer.pointer.getInt(0)
-                break
+                return new IntByReference(newValue as int).pointer
             case [GP_WIDGET_RANGE]:
                 // TODO check if that actually works
-                //return valuePointer.pointer.getFloat(0)
-                break
+                return new FloatByReference(newValue as float).pointer
+            default:
+                throw new IllegalStateException("Cannot modify path $path of type $type")
         }
     }
 
