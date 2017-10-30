@@ -13,6 +13,7 @@ import groovy.transform.ToString
 
 import static de.rfnbrgr.grphoto2.jna.Gphoto2Library.CameraWidgetType.GP_WIDGET_SECTION
 import static de.rfnbrgr.grphoto2.jna.Gphoto2Library.CameraWidgetType.GP_WIDGET_WINDOW
+import static de.rfnbrgr.grphoto2.util.GphotoUtil.checkErrorCode
 import static de.rfnbrgr.grphoto2.util.WidgetTypeUtil.mapCameraWidgetType
 
 @Canonical
@@ -35,13 +36,9 @@ class CameraConnection implements Closeable {
     }
 
     Config readConfig() {
-        def window = new PointerByReference()
-        lib.gp_camera_get_config(camera, window, context)
-
-        window.pointer = window.value
-        def rootWidget = new WidgetWrapper(lib, window)
-
-        new Config(walkWidget(rootWidget))
+        (Config) withRootWidget { WidgetWrapper rootWidget ->
+            new Config(walkWidget(rootWidget))
+        }
     }
 
     private walkWidget(WidgetWrapper widget) {
@@ -77,6 +74,28 @@ class CameraConnection implements Closeable {
                 choices: choices,
                 readOnly: widget.readOnly as Boolean,
         )
+    }
+
+    void updateConfig(ConfigEntry... entries) {
+        withRootWidget { WidgetWrapper rootWidget ->
+            entries.each { entry ->
+                def widgetToUpdate = rootWidget.getByPath(entry.field.path)
+                widgetToUpdate.setValue(entry.value)
+            }
+            checkErrorCode(lib.gp_camera_set_config(camera, rootWidget.widget, context))
+        }
+    }
+
+    private withRootWidget(Closure closure) {
+        def window = new PointerByReference()
+        checkErrorCode(lib.gp_camera_get_config(camera, window, context))
+        try {
+            window.pointer = window.value
+            def rootWidget = new WidgetWrapper(lib, window)
+            closure(rootWidget)
+        } finally {
+            lib.gp_widget_unref(window)
+        }
     }
 
 }

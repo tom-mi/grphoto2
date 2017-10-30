@@ -23,6 +23,8 @@ class CameraConnectionSpec extends Specification {
     def cleanup() {
         connection.close()
         grphoto.close()
+
+        ['gphoto2', '--port', PATH, '--set-config-value', '/main/settings/autofocus=On'].execute()
     }
 
     def 'config can be read'() {
@@ -74,5 +76,28 @@ class CameraConnectionSpec extends Specification {
         value closeTo(expectedValue, 10)
 
         config.each { println it }
+    }
+
+    def 'config can be updated'() {
+        when:
+        def config = connection.readConfig()
+
+        then:
+        config.getByPath('/main/settings/autofocus').value == 'On'
+
+        when:
+        def update = config.getByPath('/main/settings/autofocus')
+                .entryForUpdate('Off')
+        connection.updateConfig(update)
+
+        then:
+        noExceptionThrown()
+
+        when:
+        def newConfig = connection.readConfig()
+
+        then:
+        newConfig.getByPath('/main/settings/autofocus').value == 'Off'
+
     }
 }

@@ -1,9 +1,14 @@
 package de.rfnbrgr.grphoto2.util
 
+import com.sun.jna.Memory
+import com.sun.jna.Native
+import com.sun.jna.Pointer
 import com.sun.jna.ptr.IntByReference
 import com.sun.jna.ptr.PointerByReference
 import de.rfnbrgr.grphoto2.jna.Gphoto2Library
 import groovy.transform.Memoized
+
+import java.nio.ByteBuffer
 
 import static de.rfnbrgr.grphoto2.jna.Gphoto2Library.CameraWidgetType.*
 import static de.rfnbrgr.grphoto2.util.GphotoUtil.checkErrorCode
@@ -50,7 +55,6 @@ class WidgetWrapper {
         valuePointer.value.getString(0)
     }
 
-    @Memoized
     def getValue() {
         def valuePointer = new PointerByReference()
         checkErrorCode(lib.gp_widget_get_value(widget, valuePointer.pointer))
@@ -67,7 +71,29 @@ class WidgetWrapper {
                 // TODO check if that actually works
                 return valuePointer.pointer.getFloat(0)
         }
+    }
 
+    def setValue(newValue) {
+        //def valuePointer = new PointerByReference()
+        def valuePointer = populateValuePointerWithCorrectType(newValue)
+        checkErrorCode(lib.gp_widget_set_value(widget, valuePointer))
+    }
+
+    private Pointer populateValuePointerWithCorrectType(newValue) {
+        switch (type) {
+            case [GP_WIDGET_TEXT, GP_WIDGET_RADIO, GP_WIDGET_MENU]:
+                def bytes = (newValue as String).getBytes("ascii")
+                ByteBuffer buffer = ByteBuffer.allocateDirect(bytes.length + 1)
+                buffer.put(bytes)
+                return Native.getDirectBufferPointer(buffer);
+            case [GP_WIDGET_DATE, GP_WIDGET_TOGGLE]:
+                //valuePointer.pointer.getInt(0)
+                break
+            case [GP_WIDGET_RANGE]:
+                // TODO check if that actually works
+                //return valuePointer.pointer.getFloat(0)
+                break
+        }
     }
 
     @Memoized
@@ -85,5 +111,15 @@ class WidgetWrapper {
     @Memoized
     WidgetChildren getChildren() {
         new WidgetChildren(lib, widget, path)
+    }
+
+    WidgetWrapper getByPath(String path) {
+        if (!path.startsWith(this.path)) {
+            throw new IllegalArgumentException("Cannot reach path  $path  from  ${this.path}")
+        }
+        if (path == this.path) {
+            return this
+        }
+        return children.find { path.startsWith(it.path) }.getByPath(path)
     }
 }
