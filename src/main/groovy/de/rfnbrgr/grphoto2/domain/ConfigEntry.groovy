@@ -12,6 +12,8 @@ class ConfigEntry {
     def value
 
     ConfigEntry entryForUpdate(newValue) {
+        field.validateUpdate(newValue)
         new ConfigEntry(field, newValue)
     }
+
 }

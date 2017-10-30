@@ -15,4 +15,23 @@ class ConfigField {
     ConfigFieldType type
     List<String> choices
     Boolean readOnly
+
+    void validateUpdate(newValue) {
+        validateReadability()
+        validateChoice(newValue)
+    }
+
+    private validateReadability() {
+        if (readOnly) {
+            throw new UpdateError("Cannot update a readOnly field")
+        }
+    }
+
+    private validateChoice(value) {
+        if (type in [ConfigFieldType.MENU, ConfigFieldType.RADIO]) {
+            if (!(value in choices)) {
+                throw new UpdateError("Cannot update field with choices $choices to invalid value $value")
+            }
+        }
+    }
 }

@@ -1,7 +1,10 @@
 package de.rfnbrgr.grphoto2
 
 import de.rfnbrgr.grphoto2.domain.ConfigFieldType
+import de.rfnbrgr.grphoto2.domain.GphotoError
+import de.rfnbrgr.grphoto2.domain.UpdateError
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -76,7 +79,7 @@ class CameraConnectionSpec extends Specification {
         def expectedValue = LocalDateTime.now(ZoneId.of('UTC')).atZone(ZoneId.systemDefault()).toEpochSecond()
         value closeTo(expectedValue, 10)
 
-        config.each { println it }
+        config.findAll { !it.field.readOnly }.each { println it }
     }
 
     def 'config can be updated'() {
@@ -104,4 +107,25 @@ class CameraConnectionSpec extends Specification {
         newConfig.getByPath('/main/settings/autofocus').value == 'Off'
         newConfig.getByPath('/main/settings/fastfs').value == 0
     }
+
+    @Unroll
+    def 'config update #path = #newValue fails with #exception - #description'() {
+        setup:
+        def config = connection.readConfig()
+
+        when:
+        def updates = [config.getByPath(path).entryForUpdate(newValue)]
+        connection.updateConfig(updates)
+
+        then:
+        def ex = thrown(exception)
+        println(ex)
+
+        where:
+        path                        | newValue || exception   | description
+        '/main/status/batterylevel' | '100'    || UpdateError | 'a property known to be readonly cannot be changed'
+        '/main/status/manufacturer' | 'ACME'   || GphotoError | 'a property readonly on the camera cannot be changed'
+        '/main/settings/autofocus'  | 'auto'   || UpdateError | 'property cannot be changed to invalid choice'
+    }
+
 }
