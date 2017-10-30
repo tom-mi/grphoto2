@@ -30,4 +30,7 @@ jnaerator {
     libraryName 'gphoto2'
     packageName 'de.rfnbrgr.grphoto2.jna'
     headerFiles '/usr/include/gphoto2/gphoto2.h'
+    // For unknown reasons the argument name 'readonly' for gp_widget_get_readonly(...) confuses JNAerator (causing
+    // everything from that line and following to be missing), so we replace it by something else.
+    args '-v', '-Mreadonly=readonly_'
 }
