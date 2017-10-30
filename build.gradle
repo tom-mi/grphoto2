@@ -10,6 +10,7 @@ buildscript {
 
 apply plugin: 'org.anarres.jnaerator'
 apply plugin: 'groovy'
+apply plugin: 'idea'
 
 repositories {
     jcenter()
@@ -33,4 +34,36 @@ jnaerator {
     // For unknown reasons the argument name 'readonly' for gp_widget_get_readonly(...) confuses JNAerator (causing
     // everything from that line and following to be missing), so we replace it by something else.
     args '-v', '-Mreadonly=readonly_'
+}
+
+sourceSets {
+    manualTest {
+        groovy{
+            srcDir 'src/manual-test/groovy'
+        }
+    }
+}
+
+dependencies {
+    manualTestCompile sourceSets.main.output
+    manualTestCompile sourceSets.test.output
+
+    manualTestCompile configurations.compile
+    manualTestCompile configurations.testCompile
+
+    manualTestRuntime configurations.runtime
+    manualTestRuntime configurations.testRuntime
+}
+
+task manualTest(type: Test) {
+    description = "Run manual tests (located in src/manual-test)"
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    testClassesDirs = sourceSets.manualTest.output
+    classpath = sourceSets.manualTest.runtimeClasspath
+}
+
+idea{
+    module {
+        testSourceDirs += sourceSets.manualTest.groovy.srcDirs
+    }
 }
