@@ -14,4 +14,5 @@ class ConfigField {
     String label
     ConfigFieldType type
     List<String> choices
+    Boolean readOnly
 }

@@ -76,6 +76,13 @@ class WidgetWrapper {
     }
 
     @Memoized
+    def getReadOnly() {
+        def valuePointer = new IntByReference()
+        checkErrorCode(lib.gp_widget_get_readonly(widget, valuePointer))
+        valuePointer.value
+    }
+
+    @Memoized
     WidgetChildren getChildren() {
         new WidgetChildren(lib, widget, path)
     }

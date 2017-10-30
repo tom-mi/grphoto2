@@ -23,7 +23,6 @@ class CameraConnection implements Closeable {
     private PointerByReference context
     private Camera camera
 
-
     CameraConnection(Gphoto2Library lib, PointerByReference context, Camera camera) {
         this.lib = lib
         this.context = context
@@ -76,6 +75,7 @@ class CameraConnection implements Closeable {
                 label: widget.label,
                 type: type,
                 choices: choices,
+                readOnly: widget.readOnly as Boolean,
         )
     }
 

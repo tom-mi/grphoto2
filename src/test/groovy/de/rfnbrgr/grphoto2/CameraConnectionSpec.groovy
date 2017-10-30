@@ -39,6 +39,7 @@ class CameraConnectionSpec extends Specification {
             field.label == 'Camera Model'
             field.type == ConfigFieldType.TEXT
             field.choices == []
+            !field.readOnly
             value == 'VC'
         }
         with(config.getByPath('/main/settings/autofocus')) {
@@ -47,21 +48,25 @@ class CameraConnectionSpec extends Specification {
             field.label == 'Autofocus'
             field.type == ConfigFieldType.RADIO
             field.choices == ['On', 'Off']
+            !field.readOnly
             value == 'On'
         }
         with(config.getByPath('/main/settings/fastfs')) {
             field.type == ConfigFieldType.TOGGLE
             field.choices == []
+            !field.readOnly
             value == 1
         }
         with(config.getByPath('/main/other/5003')) {
             field.type == ConfigFieldType.MENU
             field.choices == ['640x480', '1024x768', '2048x1536']
+            field.readOnly
             value == '640x480'
         }
         with(config.getByPath('/main/settings/datetime')) {
             field.type == ConfigFieldType.DATE
             field.choices == []
+            !field.readOnly
         }
         def value = config.getByPath('/main/settings/datetime').getValue()
         // This seems to be a bug in libgphoto's and/or vusb's timezone handling
