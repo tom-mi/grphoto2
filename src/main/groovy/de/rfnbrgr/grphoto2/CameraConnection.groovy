@@ -2,7 +2,6 @@ package de.rfnbrgr.grphoto2
 
 import com.sun.jna.ptr.PointerByReference
 import de.rfnbrgr.grphoto2.domain.CameraFile
-import de.rfnbrgr.grphoto2.domain.CaptureType
 import de.rfnbrgr.grphoto2.domain.Config
 import de.rfnbrgr.grphoto2.domain.ConfigEntry
 import de.rfnbrgr.grphoto2.domain.ConfigField
@@ -103,25 +102,12 @@ class CameraConnection implements Closeable {
         }
     }
 
-    CameraFile capture(CaptureType captureType) {
+    CameraFile capture_image() {
         def path = new CameraFilePath()
-        checkErrorCode(lib.gp_camera_capture(camera, mapCaptureType(captureType), path, context))
+        checkErrorCode(lib.gp_camera_capture(camera, GP_CAPTURE_IMAGE, path, context))
         def folder = new String(path.folder)
         def name = new String(path.name)
         new CameraFile(folder: folder, name: name)
-    }
-
-    private static int mapCaptureType(CaptureType captureType) {
-        switch(captureType) {
-            case CaptureType.IMAGE:
-                return GP_CAPTURE_IMAGE
-            case CaptureType.MOVIE:
-                return GP_CAPTURE_MOVIE
-            case CaptureType.SOUND:
-                return GP_CAPTURE_SOUND
-            default:
-                throw new IllegalStateException("Unknown capture type $captureType")
-        }
     }
 
 }

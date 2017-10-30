@@ -1,6 +1,5 @@
 package de.rfnbrgr.grphoto2
 
-import de.rfnbrgr.grphoto2.domain.CaptureType
 import spock.lang.Specification
 
 class CaptureManualSpec extends Specification {
@@ -22,7 +21,7 @@ class CaptureManualSpec extends Specification {
 
     def 'capture works'() {
         when:
-        def file = connection.capture(CaptureType.IMAGE)
+        def file = connection.capture_image()
 
         then:
         noExceptionThrown()
