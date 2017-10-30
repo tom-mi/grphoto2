@@ -6,6 +6,9 @@ import de.rfnbrgr.grphoto2.domain.Config
 import de.rfnbrgr.grphoto2.domain.ConfigEntry
 import de.rfnbrgr.grphoto2.domain.ConfigField
 import de.rfnbrgr.grphoto2.domain.ConfigFieldType
+import de.rfnbrgr.grphoto2.domain.FloatConfigEntry
+import de.rfnbrgr.grphoto2.domain.IntegerConfigEntry
+import de.rfnbrgr.grphoto2.domain.StringConfigEntry
 import de.rfnbrgr.grphoto2.jna.Camera
 import de.rfnbrgr.grphoto2.jna.CameraFilePath
 import de.rfnbrgr.grphoto2.jna.Gphoto2Library
@@ -61,7 +64,12 @@ class CameraConnection implements Closeable {
 
     private static mapWidget(WidgetWrapper widget) {
         def field = mapField(widget)
-        new ConfigEntry(field, widget.value)
+        switch (widget.value.class) {
+            case String: return new StringConfigEntry(field, (String)widget.value )
+            case Integer: return new IntegerConfigEntry(field, (Integer)widget.value)
+            case Float: return new FloatConfigEntry(field, (Float)widget.value)
+            default: throw new IllegalArgumentException("Value must be of type String, Integer or Float, got ${widget.value.class}")
+        }
     }
 
     private static mapField(WidgetWrapper widget) {

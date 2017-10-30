@@ -1,11 +1,9 @@
 package de.rfnbrgr.grphoto2.domain
 
-import groovy.transform.Canonical
+import groovy.transform.Immutable
 import groovy.transform.ToString
-import jdk.nashorn.internal.ir.annotations.Immutable
 
 @Immutable
-@Canonical
 @ToString(includePackage = false)
 class DetectedCamera {
     String model
