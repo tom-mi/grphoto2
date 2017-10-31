@@ -8,9 +8,14 @@ buildscript {
     }
 }
 
+plugins {
+    id 'com.jfrog.bintray' version '1.7.3'
+}
+
 apply plugin: 'org.anarres.jnaerator'
 apply plugin: 'groovy'
 apply plugin: 'idea'
+apply plugin: 'maven-publish'
 
 repositories {
     jcenter()
@@ -28,6 +33,9 @@ dependencies {
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+group 'de.rfnbrgr'
+version '1.0.0'
+
 jnaerator {
     libraryName 'gphoto2'
     packageName 'de.rfnbrgr.grphoto2.jna'
@@ -39,7 +47,7 @@ jnaerator {
 
 sourceSets {
     manualTest {
-        groovy{
+        groovy {
             srcDir 'src/manual-test/groovy'
         }
     }
@@ -63,8 +71,36 @@ task manualTest(type: Test) {
     classpath = sourceSets.manualTest.runtimeClasspath
 }
 
-idea{
+idea {
     module {
         testSourceDirs += sourceSets.manualTest.groovy.srcDirs
     }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url "$buildDir/repo"
+        }
+    }
+}
+
+bintray {
+    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : 'undefined'
+    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : 'undefined'
+    pkg {
+        repo = 'de.rfnbrgr'
+        name = 'grphoto2'
+        licenses = ['MIT']
+        vcsUrl = 'https://github.com/tom-mi/grphoto2.git'
+        version {
+            name = project.version
+        }
+    }
+    publications = ['mavenJava']
 }
