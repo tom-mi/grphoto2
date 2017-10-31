@@ -2,7 +2,7 @@ package de.rfnbrgr.grphoto2.util
 
 import javax.jmdns.ServiceInfo
 
-class MdnsEventParser {
+class MdnsInfoParser {
 
     static extractName(ServiceInfo info) {
         extractCanonName(info) ?: info.name

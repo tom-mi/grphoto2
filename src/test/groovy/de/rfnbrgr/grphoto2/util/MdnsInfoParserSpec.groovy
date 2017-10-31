@@ -5,7 +5,7 @@ import spock.lang.Unroll
 
 import javax.jmdns.ServiceInfo
 
-class MdnsEventParserSpec extends Specification {
+class MdnsInfoParserSpec extends Specification {
 
     @Unroll
     def 'test extractName - [#expectedName]'() {
@@ -16,7 +16,7 @@ class MdnsEventParserSpec extends Specification {
         ] as ServiceInfo
 
         expect:
-        MdnsEventParser.extractName(info) == expectedName
+        MdnsInfoParser.extractName(info) == expectedName
 
         where:
         name             | properties                            || expectedName

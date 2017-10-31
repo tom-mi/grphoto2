@@ -9,7 +9,7 @@ import javax.jmdns.JmDNS
 import javax.jmdns.ServiceEvent
 import javax.jmdns.ServiceListener
 
-import static de.rfnbrgr.grphoto2.util.MdnsEventParser.extractName
+import static MdnsInfoParser.extractName
 
 @Slf4j
 class NetworkCameraFinder {
