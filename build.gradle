@@ -22,6 +22,7 @@ dependencies {
     testCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
     compile 'org.slf4j:slf4j-api:1.7.24'
     compile 'org.slf4j:slf4j-simple:1.7.24'
+    compile 'javax.jmdns:jmdns:3.4.1'
 }
 
 sourceCompatibility = 1.8

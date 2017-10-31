@@ -7,6 +7,7 @@ import de.rfnbrgr.grphoto2.domain.DetectedCamera
 import de.rfnbrgr.grphoto2.jna.Camera
 import de.rfnbrgr.grphoto2.jna.Gphoto2Library
 import de.rfnbrgr.grphoto2.util.ListWrapper
+import de.rfnbrgr.grphoto2.util.NetworkCameraFinder
 import de.rfnbrgr.grphoto2.util.PortInfoListWrapper
 import de.rfnbrgr.grphoto2.util.PortInfoWrapper
 import groovy.util.logging.Slf4j
@@ -96,6 +97,10 @@ class Grphoto2 implements Closeable {
             rawPortList.pointer = null
             lib.gp_port_info_list_free(rawPortList)
         }
+    }
+
+    static NetworkCameraFinder networkAutodetect() {
+        new NetworkCameraFinder()
     }
 
     @Override
