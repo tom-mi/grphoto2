@@ -78,13 +78,18 @@ class NetworkCameraFinder {
     }
 
     void stop() {
-        log.debug('Closing mdns instances')
-        jmdnsProcesses.each { it.close() }
-        log.debug('Closed mdns instances')
+        listener.callbacks.clear()
+        log.debug('Starting cleanup thread...')
+        Thread.start {
+            log.debug('Closing mdns instances')
+            jmdnsProcesses.each { it.close() }
+            log.debug('Closed mdns instances')
+        }
     }
 
     List<DetectedCamera> stopAndReturnCameras() {
+        List<DetectedCamera> result = listener.cameras.clone() as List<DetectedCamera>
         stop()
-        return listener.cameras
+        return result
     }
 }
