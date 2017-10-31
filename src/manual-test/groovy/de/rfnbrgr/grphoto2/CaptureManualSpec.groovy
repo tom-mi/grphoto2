@@ -9,7 +9,7 @@ class CaptureManualSpec extends Specification {
 
     def setup() {
         grphoto = new Grphoto2()
-        def detectedCameras = grphoto.camera_autodetect()
+        def detectedCameras = grphoto.usbAutodetect()
         assert detectedCameras.size() > 0: 'Please connect a camera!'
         connection = grphoto.connect(detectedCameras.first())
     }

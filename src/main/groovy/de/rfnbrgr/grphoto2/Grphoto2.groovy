@@ -41,7 +41,7 @@ class Grphoto2 implements Closeable {
         }
     }
 
-    List<DetectedCamera> camera_autodetect() {
+    List<DetectedCamera> usbAutodetect() {
         def rawList = new PointerByReference()
         checkErrorCode(lib.gp_list_new(rawList))
         rawList.pointer = rawList.value

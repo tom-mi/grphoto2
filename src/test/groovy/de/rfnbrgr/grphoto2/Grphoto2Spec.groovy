@@ -19,9 +19,9 @@ class Grphoto2Spec extends Specification {
         grphoto.close()
     }
 
-    def 'camera_autodetect works'() {
+    def 'usb auto detect works'() {
         when:
-        def cameras = grphoto.camera_autodetect()
+        def cameras = grphoto.usbAutodetect()
 
         then:
         noExceptionThrown()
