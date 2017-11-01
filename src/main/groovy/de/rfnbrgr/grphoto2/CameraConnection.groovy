@@ -1,14 +1,7 @@
 package de.rfnbrgr.grphoto2
 
 import com.sun.jna.ptr.PointerByReference
-import de.rfnbrgr.grphoto2.domain.CameraFile
-import de.rfnbrgr.grphoto2.domain.Config
-import de.rfnbrgr.grphoto2.domain.ConfigEntry
-import de.rfnbrgr.grphoto2.domain.ConfigField
-import de.rfnbrgr.grphoto2.domain.ConfigFieldType
-import de.rfnbrgr.grphoto2.domain.FloatConfigEntry
-import de.rfnbrgr.grphoto2.domain.IntegerConfigEntry
-import de.rfnbrgr.grphoto2.domain.StringConfigEntry
+import de.rfnbrgr.grphoto2.domain.*
 import de.rfnbrgr.grphoto2.jna.Camera
 import de.rfnbrgr.grphoto2.jna.CameraFilePath
 import de.rfnbrgr.grphoto2.jna.Gphoto2Library
@@ -16,7 +9,7 @@ import de.rfnbrgr.grphoto2.util.WidgetWrapper
 import groovy.transform.Canonical
 import groovy.transform.ToString
 
-import static de.rfnbrgr.grphoto2.jna.Gphoto2Library.CameraCaptureType.*
+import static de.rfnbrgr.grphoto2.jna.Gphoto2Library.CameraCaptureType.GP_CAPTURE_IMAGE
 import static de.rfnbrgr.grphoto2.jna.Gphoto2Library.CameraWidgetType.GP_WIDGET_SECTION
 import static de.rfnbrgr.grphoto2.jna.Gphoto2Library.CameraWidgetType.GP_WIDGET_WINDOW
 import static de.rfnbrgr.grphoto2.util.GphotoUtil.checkErrorCode
@@ -64,12 +57,8 @@ class CameraConnection implements Closeable {
 
     private static mapWidget(WidgetWrapper widget) {
         def field = mapField(widget)
-        switch (widget.value.class) {
-            case String: return new StringConfigEntry(field, (String)widget.value )
-            case Integer: return new IntegerConfigEntry(field, (Integer)widget.value)
-            case Float: return new FloatConfigEntry(field, (Float)widget.value)
-            default: throw new IllegalArgumentException("Value must be of type String, Integer or Float, got ${widget.value.class}")
-        }
+        def value = ConfigValue.of(widget.value)
+        new ConfigEntry(field, value)
     }
 
     private static mapField(WidgetWrapper widget) {
