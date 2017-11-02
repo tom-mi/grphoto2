@@ -101,6 +101,10 @@ class WidgetWrapper {
         new WidgetChoicesWrapper(lib, widget)
     }
 
+    WidgetRangeWrapper getRange() {
+        new WidgetRangeWrapper(lib, widget)
+    }
+
     @Memoized
     def getReadOnly() {
         def valuePointer = new IntByReference()

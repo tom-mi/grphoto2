@@ -74,6 +74,9 @@ class CameraConnection implements Closeable {
                 type: type,
                 choices: choices,
                 readOnly: widget.readOnly as Boolean,
+                rangeMin: type == ConfigFieldType.RANGE ? widget.range.min : null,
+                rangeMax: type == ConfigFieldType.RANGE ? widget.range.max : null,
+                rangeIncrement: type == ConfigFieldType.RANGE ? widget.range.increment : null,
         )
     }
 
