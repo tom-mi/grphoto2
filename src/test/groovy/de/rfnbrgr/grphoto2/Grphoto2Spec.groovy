@@ -68,4 +68,16 @@ class Grphoto2Spec extends Specification {
         then:
         thrown(CameraNotFoundError)
     }
+
+    def 'connect to camera - times out for DetectedCamera which matches only by prefix'() {
+        when:
+        def connection = grphoto.connect(new DetectedCamera(model: MODEL, path: 'ptpip:127.0.0.1'))
+
+        then:
+        noExceptionThrown()
+        connection instanceof CameraConnection
+
+        cleanup:
+        connection?.close()
+    }
 }

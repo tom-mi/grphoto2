@@ -63,6 +63,12 @@ class Grphoto2 implements Closeable {
         (CameraConnection) withPortList { PortInfoListWrapper portList ->
             def portInfo = portList.find { it.path == path }
             if (!portInfo) {
+                portInfo = portList.find { it.path.endsWith(':') && path.startsWith(it.path) }
+                if (portInfo != null) {
+                    portInfo.path = path
+                }
+            }
+            if (!portInfo) {
                 throw new CameraNotFoundError("No camera found at path [$path]")
             }
             connectWithPortInfo(portInfo)
@@ -107,4 +113,5 @@ class Grphoto2 implements Closeable {
     void close() throws IOException {
         lib.gp_context_unref(context)
     }
+
 }

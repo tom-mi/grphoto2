@@ -21,4 +21,8 @@ class PortInfoWrapper {
         return valuePointer.value.getString(0)
     }
 
+    void setPath(String path) {
+        checkErrorCode(lib.gp_port_info_set_path(info, path))
+    }
+
 }
