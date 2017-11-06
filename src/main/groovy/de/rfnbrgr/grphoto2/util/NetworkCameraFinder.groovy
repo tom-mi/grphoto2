@@ -15,7 +15,7 @@ import static MdnsInfoParser.extractName
 class NetworkCameraFinder {
 
     private static final LISTEN_ADDRESSES = [Inet4Address.getByName('0.0.0.0'), Inet6Address.getByName('::')]
-    private final jmdnsProcesses
+    private final jmdnsProcesses = []
     private final CameraFinderListener listener
 
     private static class CameraFinderListener implements ServiceListener {
@@ -58,18 +58,20 @@ class NetworkCameraFinder {
         log.debug('Starting mdns discovery...')
         listener = new CameraFinderListener()
 
-        jmdnsProcesses = LISTEN_ADDRESSES.collect { InetAddress address ->
+    }
+
+    void start() {
+        LISTEN_ADDRESSES.each { InetAddress address ->
             log.debug("Creating listener on address $address")
-            def jmdns = null
             try {
-                jmdns = JmDNS.create(address)
+                def jmdns = JmDNS.create(address)
                 jmdns.addServiceListener('_ptp._tcp.local.', listener)
+                jmdnsProcesses << jmdns
             } catch (Exception e) {
                 log.warn("Could not create listener on address $address:", e)
             }
             log.debug("Created listener on address $address")
-            jmdns
-        }.findResults { it }
+        }
     }
 
     void onDetect(

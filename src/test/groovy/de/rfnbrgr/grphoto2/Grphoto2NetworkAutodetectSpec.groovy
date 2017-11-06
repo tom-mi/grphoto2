@@ -26,7 +26,7 @@ class Grphoto2NetworkAutodetectSpec extends Specification {
         def finder = grphoto.networkAutodetect()
 
         when:
-        Thread.sleep(1000)
+        finder.start()
         mdnsTestService.registerService(PTP_TYPE, SERVICE_NAME, PORT, TEXT)
         Thread.sleep(1000)
 
@@ -47,11 +47,9 @@ class Grphoto2NetworkAutodetectSpec extends Specification {
         finder.onDetect { it -> cameras << it }
 
         when:
-        Thread.sleep(1000)
+        finder.start()
         mdnsTestService.registerService(PTP_TYPE, SERVICE_NAME, PORT, TEXT)
         Thread.sleep(1000)
-
-        and:
 
         then:
         cameras.size() > 0
