@@ -8,4 +8,5 @@ import groovy.transform.ToString
 class DetectedCamera {
     String model
     String path
+    String guid
 }

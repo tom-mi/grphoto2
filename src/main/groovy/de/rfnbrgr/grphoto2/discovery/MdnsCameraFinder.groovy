@@ -1,4 +1,4 @@
-package de.rfnbrgr.grphoto2.util
+package de.rfnbrgr.grphoto2.discovery
 
 import de.rfnbrgr.grphoto2.domain.DetectedCamera
 import groovy.transform.stc.ClosureParams
@@ -9,18 +9,18 @@ import javax.jmdns.JmDNS
 import javax.jmdns.ServiceEvent
 import javax.jmdns.ServiceListener
 
+import static MdnsInfoParser.extractGuid
 import static MdnsInfoParser.extractName
 
 @Slf4j
-class NetworkCameraFinder {
+class MdnsCameraFinder implements CameraFinder {
 
     private static final LISTEN_ADDRESSES = [Inet4Address.getByName('0.0.0.0'), Inet6Address.getByName('::')]
     private final jmdnsProcesses = []
-    private final CameraFinderListener listener
+    private final MdnsListener listener
 
-    private static class CameraFinderListener implements ServiceListener {
+    private static class MdnsListener implements ServiceListener {
 
-        List<DetectedCamera> cameras = []
         List<Closure> callbacks = []
 
         @Override
@@ -37,15 +37,14 @@ class NetworkCameraFinder {
         void serviceResolved(ServiceEvent event) {
             log.debug("Service resolved: $event.info")
             try {
-                event.info.niceTextString
                 String name = extractName(event.info)
-                log.info("Found service [$name]")
+                log.debug("Found service [$name]")
 
                 event.info.inetAddresses.each { address ->
                     String path = 'ptpip:' + address.hostAddress + ':' + event.info.port
-                    def camera = new DetectedCamera(name, path)
+                    String guid = extractGuid(event.info)
+                    def camera = new DetectedCamera(name, path, guid)
                     log.debug("Found camera $camera")
-                    cameras << camera
                     callbacks.each { it(camera) }
                 }
             } catch (Exception e) {
@@ -54,13 +53,15 @@ class NetworkCameraFinder {
         }
     }
 
-    NetworkCameraFinder() {
+    MdnsCameraFinder() {
         log.debug('Starting mdns discovery...')
-        listener = new CameraFinderListener()
-
+        listener = new MdnsListener()
     }
 
+    @Override
     void start() {
+
+
         LISTEN_ADDRESSES.each { InetAddress address ->
             log.debug("Creating listener on address $address")
             try {
@@ -74,11 +75,13 @@ class NetworkCameraFinder {
         }
     }
 
+    @Override
     void onDetect(
             @ClosureParams(value = SimpleType.class, options = 'de.rfnbrgr.grphoto2.domain.DetectedCamera') Closure callback) {
         listener.callbacks << callback
     }
 
+    @Override
     void stop() {
         listener.callbacks.clear()
         log.debug('Starting cleanup thread...')
@@ -89,9 +92,4 @@ class NetworkCameraFinder {
         }
     }
 
-    List<DetectedCamera> stopAndReturnCameras() {
-        List<DetectedCamera> result = listener.cameras.clone() as List<DetectedCamera>
-        stop()
-        return result
-    }
 }

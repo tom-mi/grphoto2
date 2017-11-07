@@ -7,10 +7,12 @@ import de.rfnbrgr.grphoto2.domain.DetectedCamera
 import de.rfnbrgr.grphoto2.jna.Camera
 import de.rfnbrgr.grphoto2.jna.Gphoto2Library
 import de.rfnbrgr.grphoto2.util.ListWrapper
-import de.rfnbrgr.grphoto2.util.NetworkCameraFinder
+import de.rfnbrgr.grphoto2.discovery.NetworkCameraFinder
 import de.rfnbrgr.grphoto2.util.PortInfoListWrapper
 import de.rfnbrgr.grphoto2.util.PortInfoWrapper
 import groovy.util.logging.Slf4j
+
+import java.nio.ByteBuffer
 
 import static de.rfnbrgr.grphoto2.util.GphotoUtil.checkErrorCode
 
@@ -56,10 +58,14 @@ class Grphoto2 implements Closeable {
     }
 
     CameraConnection connect(DetectedCamera camera) {
-        connect(camera.path)
+        connect(camera.path, camera.guid)
     }
 
     CameraConnection connect(String path) {
+        connect(path, null)
+    }
+
+    CameraConnection connect(String path, String guid) {
         (CameraConnection) withPortList { PortInfoListWrapper portList ->
             def portInfo = portList.find { it.path == path }
             if (!portInfo) {
@@ -68,11 +74,19 @@ class Grphoto2 implements Closeable {
                     portInfo.path = path
                 }
             }
+            if (guid) {
+                setPtpIpGuid(guid)
+            }
             if (!portInfo) {
                 throw new CameraNotFoundError("No camera found at path [$path]")
             }
             connectWithPortInfo(portInfo)
         }
+    }
+
+    private setPtpIpGuid(String guid) {
+        checkErrorCode(lib.gp_setting_set(ByteBuffer.wrap('gphoto'.bytes), ByteBuffer.wrap('model'.bytes), ByteBuffer.wrap('PTP/IP Camera'.bytes)))
+        checkErrorCode(lib.gp_setting_set(ByteBuffer.wrap('ptp_ip'.bytes), ByteBuffer.wrap('guid'.bytes), ByteBuffer.wrap(guid.bytes)))
     }
 
     private CameraConnection connectWithPortInfo(PortInfoWrapper portInfo) {
