@@ -1,10 +1,12 @@
 package de.rfnbrgr.grphoto2
 
 import com.sun.jna.Pointer
+import com.sun.jna.Structure
 import com.sun.jna.ptr.PointerByReference
 import de.rfnbrgr.grphoto2.domain.CameraNotFoundError
 import de.rfnbrgr.grphoto2.domain.DetectedCamera
 import de.rfnbrgr.grphoto2.jna.Camera
+import de.rfnbrgr.grphoto2.jna.CameraAbilities
 import de.rfnbrgr.grphoto2.jna.Gphoto2Library
 import de.rfnbrgr.grphoto2.util.ListWrapper
 import de.rfnbrgr.grphoto2.discovery.NetworkCameraFinder
@@ -58,42 +60,72 @@ class Grphoto2 implements Closeable {
     }
 
     CameraConnection connect(DetectedCamera camera) {
-        connect(camera.path, camera.guid)
-    }
-
-    CameraConnection connect(String path) {
-        connect(path, null)
-    }
-
-    CameraConnection connect(String path, String guid) {
         (CameraConnection) withPortList { PortInfoListWrapper portList ->
-            def portInfo = portList.find { it.path == path }
-            if (!portInfo) {
-                portInfo = portList.find { it.path.endsWith(':') && path.startsWith(it.path) }
-                if (portInfo != null) {
-                    portInfo.path = path
-                }
+            def index = checkErrorCode(lib.gp_port_info_list_lookup_path(portList.list, camera.path))
+            def portInfoRef = new PointerByReference()
+            checkErrorCode(lib.gp_port_info_list_get_info(portList.list, index, portInfoRef))
+            def portInfo = new PortInfoWrapper(lib, new Gphoto2Library.GPPortInfo(portInfoRef.value))
+            //portInfoRef.pointer = portInfoRef.value
+
+
+            def abilitiesList = new PointerByReference()
+            def abilities = new CameraAbilities()
+            checkErrorCode(lib.gp_abilities_list_new(abilitiesList))
+            abilitiesList.pointer = abilitiesList.value
+            checkErrorCode(lib.gp_abilities_list_load(abilitiesList, context))
+            def modelIndex = checkErrorCode(lib.gp_abilities_list_lookup_model(abilitiesList, camera.model))
+            checkErrorCode(lib.gp_abilities_list_get_abilities(abilitiesList, modelIndex, abilities))
+
+            println '-------'
+            println new String(abilities.model)
+            println abilities.port
+            println abilities.status
+            println new String(abilities.library)
+            println abilities.device_type
+            println '-------'
+
+            def abilitiesByValue = new CameraAbilities.ByValue(abilities.pointer)
+            //def abilitiesByValue = //Structure.newInstance(CameraAbilities.ByValue.class, abilities.pointer)
+            //           println '-------'
+            //           println abilitiesByValue.model
+            //           println abilitiesByValue.port
+            //           println abilitiesByValue.status
+            //           println abilitiesByValue.library
+            //           println abilitiesByValue.device_type
+            //           println '-------'
+            //Structure.newInstance(CameraAbilities.ByValue, abilities.pointer)
+//            abilitiesByValue.pointer = abilities.pointer
+
+            println portInfo.path
+//            if (!portInfo) {
+            //               throw new CameraNotFoundError("No camera found at path [$path]")
+            //          }
+
+            if (camera.guid) {
+                setPtpIpGuid(camera.guid)
             }
-            if (guid) {
-                setPtpIpGuid(guid)
-            }
-            if (!portInfo) {
-                throw new CameraNotFoundError("No camera found at path [$path]")
-            }
-            connectWithPortInfo(portInfo)
+            connectWithPortInfoAndAbilities(portInfo, abilitiesByValue)
         }
     }
 
     private setPtpIpGuid(String guid) {
-        checkErrorCode(lib.gp_setting_set(ByteBuffer.wrap('gphoto'.bytes), ByteBuffer.wrap('model'.bytes), ByteBuffer.wrap('PTP/IP Camera'.bytes)))
-        checkErrorCode(lib.gp_setting_set(ByteBuffer.wrap('ptp_ip'.bytes), ByteBuffer.wrap('guid'.bytes), ByteBuffer.wrap(guid.bytes)))
+//        checkErrorCode(lib.gp_setting_set(byteBuffer('gphoto2'), byteBuffer('model'), byteBuffer('PTP/IP Camera')))
+        checkErrorCode(lib.gp_setting_set(byteBuffer('ptp2_ip'), byteBuffer('guid'), byteBuffer(guid)))
     }
 
-    private CameraConnection connectWithPortInfo(PortInfoWrapper portInfo) {
+    private static ByteBuffer byteBuffer(String s) {
+        def bytes = new byte[s.bytes.length + 1]
+        bytes[s.bytes.length] = 0
+        System.arraycopy(s.bytes, 0, bytes, 0, s.bytes.length)
+        ByteBuffer.wrap(bytes)
+    }
+
+    private CameraConnection connectWithPortInfoAndAbilities(PortInfoWrapper portInfo, CameraAbilities.ByValue abilities) {
         Camera.ByReference[] cameraReferenceArray = [new Camera.ByReference()]
         checkErrorCode(lib.gp_camera_new(cameraReferenceArray))
         def camera = cameraReferenceArray[0]
         try {
+            checkErrorCode(lib.gp_camera_set_abilities(camera, abilities))
             checkErrorCode(lib.gp_camera_set_port_info(camera, portInfo.info))
             checkErrorCode(lib.gp_camera_init(camera, context))
             return new CameraConnection(lib, context, camera)

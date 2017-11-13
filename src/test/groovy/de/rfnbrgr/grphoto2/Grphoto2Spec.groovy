@@ -29,21 +29,9 @@ class Grphoto2Spec extends Specification {
         cameras == [new DetectedCamera(model: MODEL, path: PATH)]
     }
 
-    def 'connect co camera - works for valid path'() {
-        when:
-        def connection = grphoto.connect(PATH)
-
-        then:
-        noExceptionThrown()
-        connection instanceof CameraConnection
-
-        cleanup:
-        connection?.close()
-    }
-
     def 'connect to camera - throws exception for invalid path'() {
         when:
-        grphoto.connect('usb:42,42')
+        grphoto.connect(new DetectedCamera(MODEL, 'usb:42,42', null))
 
         then:
         thrown(CameraNotFoundError)

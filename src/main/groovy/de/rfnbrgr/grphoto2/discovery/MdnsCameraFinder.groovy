@@ -54,13 +54,12 @@ class MdnsCameraFinder implements CameraFinder {
     }
 
     MdnsCameraFinder() {
-        log.debug('Starting mdns discovery...')
         listener = new MdnsListener()
     }
 
     @Override
     void start() {
-
+        log.debug('Starting mdns discovery...')
 
         LISTEN_ADDRESSES.each { InetAddress address ->
             log.debug("Creating listener on address $address")

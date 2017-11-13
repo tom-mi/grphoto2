@@ -21,7 +21,7 @@ class Grphoto2NetworkAutodetectSpec extends Specification {
         grphoto = new Grphoto2()
     }
 
-    def 'network auto detection works - synchronous usage'() {
+    def 'mdns network auto detection works - synchronous usage'() {
         setup:
         def finder = grphoto.networkAutodetect()
 
@@ -40,7 +40,7 @@ class Grphoto2NetworkAutodetectSpec extends Specification {
         camera.path == "ptpip:$HOST:$PORT"
     }
 
-    def 'network auto detection works - asynchronous usage'() {
+    def 'mdns network auto detection works - asynchronous usage'() {
         setup:
         def finder = grphoto.networkAutodetect()
         def cameras = []

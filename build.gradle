@@ -23,12 +23,16 @@ repositories {
 
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.12'
-    compile 'com.nativelibs4java:jnaerator-runtime:0.12'
-    testCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
+    compile 'com.nativelibs4java:bridj:0.7.0'
+    //compile 'com.nativelibs4java:jnaerator-runtime:0.12'
     compile 'org.slf4j:slf4j-api:1.7.24'
     compile 'org.slf4j:slf4j-simple:1.7.24'
     compile 'javax.jmdns:jmdns:3.4.1'
     compile 'io.resourcepool:ssdp-client:1.1.0'
+
+    testCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
+    testCompile 'com.github.tomjankes:wiremock-groovy:0.2.0'
+    testCompile 'com.github.tomakehurst:wiremock-standalone:2.11.0'
 }
 
 sourceCompatibility = 1.8
@@ -43,7 +47,7 @@ jnaerator {
     headerFiles '/usr/include/gphoto2/gphoto2.h'
     // For unknown reasons the argument name 'readonly' for gp_widget_get_readonly(...) confuses JNAerator (causing
     // everything from that line and following to be missing), so we replace it by something else.
-    args '-v', '-Mreadonly=readonly_'
+    args '-v', '-Mreadonly=readonly_', '-runtime', 'BridJ'
 }
 
 sourceSets {

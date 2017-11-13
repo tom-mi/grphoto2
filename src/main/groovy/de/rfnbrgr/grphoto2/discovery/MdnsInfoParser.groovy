@@ -21,9 +21,7 @@ class MdnsInfoParser {
         if (tid == null) {
             return null
         }
-        def parts = tid.split('-').collect { part -> part.split(/(?<=\G.{2})/)}
-
-        (parts[0].reverse() + parts[1].reverse() + parts[2].reverse() + parts[3] + parts[4]).join(':').toLowerCase()
+        CanonUtil.guidFromUuid(tid)
     }
 
 }

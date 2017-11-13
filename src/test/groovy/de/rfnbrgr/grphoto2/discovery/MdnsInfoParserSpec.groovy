@@ -1,6 +1,5 @@
 package de.rfnbrgr.grphoto2.discovery
 
-import de.rfnbrgr.grphoto2.discovery.MdnsInfoParser
 import spock.lang.Specification
 import spock.lang.Unroll
 

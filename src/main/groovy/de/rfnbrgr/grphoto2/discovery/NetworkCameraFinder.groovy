@@ -20,7 +20,7 @@ class NetworkCameraFinder {
             finders << new MdnsCameraFinder()
         }
         if (withSsdp) {
-            // todo
+            finders << new SsdpCameraFinder()
         }
         if (finders.size() == 0) {
             throw new IllegalStateException("All finders are disabled. Cannot discover anything.")

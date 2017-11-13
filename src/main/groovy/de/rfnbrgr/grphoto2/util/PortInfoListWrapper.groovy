@@ -19,7 +19,7 @@ class PortInfoListWrapper extends AbstractList<PortInfoWrapper> {
     @Override
     PortInfoWrapper get(int i) {
         def rawInfo = new PointerByReference()
-        lib.gp_port_info_list_get_info(list, i, rawInfo)
+        checkErrorCode(lib.gp_port_info_list_get_info(list, i, rawInfo))
         return new PortInfoWrapper(lib, new Gphoto2Library.GPPortInfo(rawInfo.value))
     }
 
