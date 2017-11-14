@@ -3,13 +3,14 @@ package de.rfnbrgr.grphoto2
 import com.sun.jna.Pointer
 import com.sun.jna.Structure
 import com.sun.jna.ptr.PointerByReference
+import de.rfnbrgr.grphoto2.discovery.NetworkCameraFinder
+import de.rfnbrgr.grphoto2.domain.CameraConnectError
 import de.rfnbrgr.grphoto2.domain.CameraNotFoundError
 import de.rfnbrgr.grphoto2.domain.DetectedCamera
 import de.rfnbrgr.grphoto2.jna.Camera
 import de.rfnbrgr.grphoto2.jna.CameraAbilities
 import de.rfnbrgr.grphoto2.jna.Gphoto2Library
 import de.rfnbrgr.grphoto2.util.ListWrapper
-import de.rfnbrgr.grphoto2.discovery.NetworkCameraFinder
 import de.rfnbrgr.grphoto2.util.PortInfoListWrapper
 import de.rfnbrgr.grphoto2.util.PortInfoWrapper
 import groovy.util.logging.Slf4j
@@ -61,10 +62,14 @@ class Grphoto2 implements Closeable {
 
     CameraConnection connect(DetectedCamera camera) {
         (CameraConnection) withPortList { PortInfoListWrapper portList ->
-            def index = checkErrorCode(lib.gp_port_info_list_lookup_path(portList.list, camera.path))
+            def index = checkErrorCode(lib.gp_port_info_list_lookup_path(portList.list, camera.path), [
+                    (Gphoto2Library.GP_ERROR_UNKNOWN_PORT): {
+                        -> throw new CameraNotFoundError("Could not lookup port info for camera at path $camera.path")
+                    }
+            ])
             def portInfoRef = new PointerByReference()
             checkErrorCode(lib.gp_port_info_list_get_info(portList.list, index, portInfoRef))
-            def portInfo = new PortInfoWrapper(lib, new Gphoto2Library.GPPortInfo(portInfoRef.value))
+            def portInfo = new Gphoto2Library.GPPortInfo(portInfoRef.value)
             //portInfoRef.pointer = portInfoRef.value
 
 
@@ -76,34 +81,13 @@ class Grphoto2 implements Closeable {
             def modelIndex = checkErrorCode(lib.gp_abilities_list_lookup_model(abilitiesList, camera.model))
             checkErrorCode(lib.gp_abilities_list_get_abilities(abilitiesList, modelIndex, abilities))
 
-            println '-------'
-            println new String(abilities.model)
-            println abilities.port
-            println abilities.status
-            println new String(abilities.library)
-            println abilities.device_type
-            println '-------'
-
-            def abilitiesByValue = new CameraAbilities.ByValue(abilities.pointer)
-            //def abilitiesByValue = //Structure.newInstance(CameraAbilities.ByValue.class, abilities.pointer)
-            //           println '-------'
-            //           println abilitiesByValue.model
-            //           println abilitiesByValue.port
-            //           println abilitiesByValue.status
-            //           println abilitiesByValue.library
-            //           println abilitiesByValue.device_type
-            //           println '-------'
-            //Structure.newInstance(CameraAbilities.ByValue, abilities.pointer)
-//            abilitiesByValue.pointer = abilities.pointer
-
-            println portInfo.path
-//            if (!portInfo) {
-            //               throw new CameraNotFoundError("No camera found at path [$path]")
-            //          }
+            def abilitiesByValue = Structure.newInstance(CameraAbilities.ByValue.class, abilities.pointer)
+            abilitiesByValue.read()
 
             if (camera.guid) {
                 setPtpIpGuid(camera.guid)
             }
+
             connectWithPortInfoAndAbilities(portInfo, abilitiesByValue)
         }
     }
@@ -120,14 +104,18 @@ class Grphoto2 implements Closeable {
         ByteBuffer.wrap(bytes)
     }
 
-    private CameraConnection connectWithPortInfoAndAbilities(PortInfoWrapper portInfo, CameraAbilities.ByValue abilities) {
+    private CameraConnection connectWithPortInfoAndAbilities(Gphoto2Library.GPPortInfo portInfo, CameraAbilities.ByValue abilities) {
         Camera.ByReference[] cameraReferenceArray = [new Camera.ByReference()]
         checkErrorCode(lib.gp_camera_new(cameraReferenceArray))
         def camera = cameraReferenceArray[0]
         try {
             checkErrorCode(lib.gp_camera_set_abilities(camera, abilities))
-            checkErrorCode(lib.gp_camera_set_port_info(camera, portInfo.info))
-            checkErrorCode(lib.gp_camera_init(camera, context))
+            checkErrorCode(lib.gp_camera_set_port_info(camera, portInfo))
+            checkErrorCode(lib.gp_camera_init(camera, context), [
+                    (Gphoto2Library.GP_ERROR_IO): { ->
+                        throw new CameraConnectError("IO Error while connection to camera (timeout?)")
+                    }
+            ])
             return new CameraConnection(lib, context, camera)
         } catch (Exception e) {
             lib.gp_camera_unref(camera)
