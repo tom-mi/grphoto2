@@ -1,3 +1,5 @@
+import javax.naming.ConfigurationException
+
 buildscript {
     repositories {
         jcenter()
@@ -38,7 +40,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group 'de.rfnbrgr'
-version '1.0.1'
+version '1.0.2'
 
 jnaerator {
     libraryName 'gphoto2'
@@ -82,7 +84,7 @@ idea {
 }
 
 task sourceJar(type: Jar) {
-	from sourceSets.main.allJava
+    from sourceSets.main.allJava
 }
 
 publishing {
@@ -90,9 +92,9 @@ publishing {
         mavenJava(MavenPublication) {
             from components.java
 
-			artifact sourceJar {
-				classifier "sources"
-			}
+            artifact sourceJar {
+                classifier "sources"
+            }
         }
     }
     repositories {
@@ -103,8 +105,11 @@ publishing {
 }
 
 bintray {
-    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : 'undefined'
-    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : 'undefined'
+    if (!project.hasProperty('bintrayUser') || !project.hasProperty('bintrayApiKey')) {
+        throw new ConfigurationException('Please set bintrayUser and bintrayApiKey')
+    }
+    user = project.property('bintrayUser')
+    key = project.property('bintrayApiKey')
     pkg {
         repo = 'de.rfnbrgr'
         name = 'grphoto2'
