@@ -43,7 +43,7 @@ class MdnsCameraFinder implements CameraFinder {
                 event.info.inetAddresses.each { address ->
                     String path = 'ptpip:' + address.hostAddress + ':' + event.info.port
                     String guid = extractGuid(event.info)
-                    def camera = new DetectedCamera(name, path, guid)
+                    def camera = new DetectedCamera(name: name, model: NetworkCameraFinder.PTP_IP_MODEL, path: path, guid: guid)
                     log.debug("Found camera $camera")
                     callbacks.each { it(camera) }
                 }

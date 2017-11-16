@@ -8,6 +8,8 @@ import groovy.util.logging.Slf4j
 @Slf4j
 class NetworkCameraFinder {
 
+    static final PTP_IP_MODEL = 'PTP/IP Camera'
+
     private final List<CameraFinder> finders = []
     boolean withMdns = true
     boolean withSsdp = true

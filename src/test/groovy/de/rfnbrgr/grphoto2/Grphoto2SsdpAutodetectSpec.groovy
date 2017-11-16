@@ -54,8 +54,10 @@ class Grphoto2SsdpAutodetectSpec extends Specification {
 
         then:
         cameras.size() > 0
-        def camera = cameras.find { it.model == 'Canon EOS 6D' }
+        def camera = cameras.find { it.name == 'Canon EOS 6D' }
+        camera
         camera.path =~ /ptpip:\d+.\d+.\d+.\d+:15740/
+        camera.model == 'PTP/IP Camera'
         camera.guid == '67:45:23:01:ed:fe:ad:de:be:ef:00:11:22:33:44:55'
     }
 

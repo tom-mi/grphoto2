@@ -27,7 +27,8 @@ class SsdpResponseHandler {
                 def name = upnpData.device.friendlyName.text() as String
                 def uuid = upnpData.device.serviceList.service.'X_targetId'.text().split(':').last()
                 def guid = CanonUtil.guidFromUuid(uuid)
-                return new DetectedCamera('PTP/IP Camera', "ptpip:$address.hostAddress:$CANON_PTPIP_PORT", guid)
+                return new DetectedCamera(name: name, model: NetworkCameraFinder.PTP_IP_MODEL,
+                        path: "ptpip:$address.hostAddress:$CANON_PTPIP_PORT", guid: guid)
             }
         } catch (Exception e) {
             log.warn('Failed to parse response', e)

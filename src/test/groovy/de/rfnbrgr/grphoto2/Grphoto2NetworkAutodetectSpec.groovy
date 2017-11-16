@@ -35,9 +35,10 @@ class Grphoto2NetworkAutodetectSpec extends Specification {
 
         then:
         cameras.size() > 0
-        def camera = cameras.find { it.model == SERVICE_NAME }
+        def camera = cameras.find { it.name == SERVICE_NAME }
         camera
         camera.path == "ptpip:$HOST:$PORT"
+        camera.model == 'PTP/IP Camera'
     }
 
     def 'mdns network auto detection works - asynchronous usage'() {
@@ -53,9 +54,10 @@ class Grphoto2NetworkAutodetectSpec extends Specification {
 
         then:
         cameras.size() > 0
-        def camera = cameras.find { it.model == SERVICE_NAME }
+        def camera = cameras.find { it.name == SERVICE_NAME }
         camera
         camera.path == "ptpip:$HOST:$PORT"
+        camera.model == 'PTP/IP Camera'
     }
 
 }

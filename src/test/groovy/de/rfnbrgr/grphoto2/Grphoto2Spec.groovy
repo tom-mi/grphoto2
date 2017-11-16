@@ -27,12 +27,12 @@ class Grphoto2Spec extends Specification {
         then:
         noExceptionThrown()
         cameras.size == 1
-        cameras == [new DetectedCamera(model: MODEL, path: PATH)]
+        cameras == [new DetectedCamera(name: MODEL, model: MODEL, path: PATH)]
     }
 
     def 'connect to camera - throws exception for invalid path'() {
         when:
-        grphoto.connect(new DetectedCamera(MODEL, 'foobar', null))
+        grphoto.connect(new DetectedCamera('Foo Camera', MODEL, 'foobar', null))
 
         then:
         thrown(CameraNotFoundError)
@@ -40,7 +40,7 @@ class Grphoto2Spec extends Specification {
 
     def 'connect to camera - works with valid camera'() {
         when:
-        def connection = grphoto.connect(new DetectedCamera(MODEL, PATH, null))
+        def connection = grphoto.connect(new DetectedCamera('Camera', MODEL, PATH, null))
 
         then:
         noExceptionThrown()

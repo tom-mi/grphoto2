@@ -14,7 +14,6 @@ class SsdpCameraFinder implements CameraFinder {
 
     private final SEARCH_TARGETS = [
             'urn:schemas-canon-com:service:ICPO-SmartPhoneEOSSystemService:1',
-//            'urn:schemas-canon-com:service:MobileConnectedCameraService:1',
     ]
 
     UdpServer server

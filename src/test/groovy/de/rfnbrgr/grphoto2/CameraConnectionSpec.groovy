@@ -1,6 +1,7 @@
 package de.rfnbrgr.grphoto2
 
 import de.rfnbrgr.grphoto2.domain.ConfigFieldType
+import de.rfnbrgr.grphoto2.domain.DetectedCamera
 import de.rfnbrgr.grphoto2.domain.GphotoError
 import de.rfnbrgr.grphoto2.domain.UpdateError
 import spock.lang.Specification
@@ -14,13 +15,14 @@ import static spock.util.matcher.HamcrestMatchers.closeTo
 class CameraConnectionSpec extends Specification {
 
     final static PATH = 'usb:001,001'
+    final static MODEL = 'Nikon DSC D750'
 
     Grphoto2 grphoto
     CameraConnection connection
 
     def setup() {
         grphoto = new Grphoto2()
-        connection = grphoto.connect(PATH)
+        connection = grphoto.connect(new DetectedCamera(MODEL, MODEL, PATH, null))
     }
 
     def cleanup() {
